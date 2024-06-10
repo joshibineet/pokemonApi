@@ -9,15 +9,23 @@ import { useEffect, useState } from "react";
 
 export default function App() {
   const [isPokemon, setIsPokemon] = useState<string>("pikachu");
-  // const { data, error, isLoading } = useGetPokemonsQuery('bulbasaur')
   const dispatch = useAppDispatch();
+  const [debouncedInputValue, setDebouncedInputValue] = React.useState("");
+
   useEffect(() => {
-    dispatch(pokemonApi.endpoints.getPokemon.initiate(isPokemon)).catch(
+    dispatch(pokemonApi.endpoints.getPokemon.initiate(debouncedInputValue)).catch(
       (error) => {
         console.error("Error fetching employees:", error);
       }
     );
-  }, [dispatch, isPokemon]);
+  }, [dispatch, debouncedInputValue]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedInputValue(isPokemon);
+    }, 200);
+    return () => clearTimeout(timeoutId);
+  }, [isPokemon]);
 
   const pokemonData = useAppSelector(
     (state: RootState) => state.baseApi.queries[`getPokemon`]?.data as Pokemon
@@ -29,18 +37,19 @@ export default function App() {
   };
 
   return (
-    <div>
-      <input type="text" onChange={handleInputChange} />
-      <h2>{pokemonData?.name}</h2>
-      {pokemonData?.sprites?.front_default ? "cha" : "chaina"}
+
+    <div className=" flex flex-col py-10 justify-center items-center">
+      <input type="text" onChange={handleInputChange} className="border-2 border-black rounded-md w-[600px] h-12" />
+      <h2 className="font-bold text-xl ">{pokemonData?.name}</h2>
+      {pokemonData?.sprites?.front_default ? "Found" : "Not Found" }
       <div className="relative">
         {pokemonData?.sprites?.front_default && (
           <Image
             src={pokemonData!.sprites!.front_default!}
-            // src="https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pexels.com%2Fsearch%2Fbackground%2F&psig=AOvVaw1igLfoR8H6iR0ZOzTUN1as&ust=1718019207422000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCMC7oLa2zoYDFQAAAAAdAAAAABAE"
             alt={pokemonData?.name}
-            width={100}
-            height={100}
+            width={300}
+            height={300}
+          
           />
         )}
       </div>
